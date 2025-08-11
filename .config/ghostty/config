@@ -1,0 +1,63 @@
+
+# set up for the font style 
+font-family = "JetBrainsMono Nerd Font"
+# font-family = FiraCode Nerd Font
+# font-family = caskaydiaMono Nerd Font
+font-size = 20
+
+# Font variations
+font-style = normal
+
+# ligatures and contextual alternates
+font-feature = +liga  # Enable ligatures
+font-feature = +calt  # Enable contextual alternates
+
+# Set up quake-style dropdown with Ctrl + /
+keybind = global:ctrl+slash=toggle_quick_terminal
+
+# Optional: animation speed (in seconds)
+# quick-terminal-animation-duration = 0.1
+
+# Window settings
+title = ""
+macos-titlebar-style = hidden
+
+
+# Window size (columns x rows)
+window-width = 180
+window-height = 65
+window-padding-x = 10
+window-padding-y = 10
+window-padding-balance = true
+
+# Setting for auto updating
+auto-update = check
+
+#Shaders
+# custom-shader = ./shaders/ghostty-shaders/bettercrt.glsl
+
+# Themes
+# theme = gotham-default
+# theme = rose-pine
+# theme = monokai-pro-octagon
+# theme = gruvbox-dark
+# theme = nord
+# theme = 3024 night
+# theme = BlueDolphin
+# theme = DjangoRebornAgain
+# theme = NvimDark
+# theme = PaleNightHC
+theme = Arthur 
+# theme = jubi
+
+
+
+# Transparency settings
+background-opacity = 0.65
+background-blur-radius = 17
+
+# Cursor settings
+cursor-style-blink = true
+cursor-style = block
+
+

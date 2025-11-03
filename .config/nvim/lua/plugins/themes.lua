@@ -9,15 +9,17 @@ return {
       }
     end,
   },
-  -- Batman theme
-  {
-    "shmerl/neogotham",
-    lazy = false, -- Loads immediately (not deferred)
-    priority = 0, -- Loads before other themes/plugins
-    config = function()
-      vim.cmd.colorscheme("neogotham")
-    end,
-  },
+  -- Batman theme (the old neogotham changed to gitlab)
+  -- {
+  --   "https://gitlab.com/shmerl/neogotham.git",
+  --   lazy = false,
+  --   priority = 1000,
+  --   config = function()
+  --     require("neogotham"):setup({ oldgotham = true })
+  --     vim.cmd.colorscheme("neogotham")
+  --   end,
+  -- },
+  -- Dracula theme config
   {
     "Mofiqul/dracula.nvim",
     lazy = false,

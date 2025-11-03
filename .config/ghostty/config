@@ -1,9 +1,9 @@
 
 # set up for the font style 
-font-family = "JetBrainsMono Nerd Font"
+# font-family = "JetBrainsMono Nerd Font"
 # font-family = FiraCode Nerd Font
-# font-family = caskaydiaMono Nerd Font
-font-size = 20
+font-family = caskaydiaMono Nerd Font
+font-size = 22
 
 # Font variations
 font-style = normal
@@ -26,8 +26,8 @@ macos-titlebar-style = hidden
 # Window size (columns x rows)
 window-width = 180
 window-height = 65
-window-padding-x = 10
-window-padding-y = 10
+window-padding-x = 20
+window-padding-y = 20
 window-padding-balance = true
 
 # Setting for auto updating

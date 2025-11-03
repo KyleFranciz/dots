@@ -4,7 +4,7 @@ return {
     "Exafunction/codeium.vim",
     event = "BufEnter",
     config = function()
-      -- Disable Codeium
+      -- Disable Codeium change to 0 or 1
       vim.g.codeium_enabled = 0
       -- Codeium keybindings (disabled when codeium_enabled = 0)
       vim.keymap.set("i", "<C-g>", function()

@@ -3,7 +3,7 @@
   "provider": {
     "ollama": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "Ollama (local)",
+      "name": "Ollama (local models)",
       "options": {
         "baseURL": "http://localhost:11434/v1"
       },

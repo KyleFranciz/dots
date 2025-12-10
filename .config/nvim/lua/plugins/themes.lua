@@ -133,7 +133,7 @@ return {
       vim.cmd.colorscheme("everforest")
     end,
   },
-  { "ellisonleao/gruvbox.nvim", priority = 1000, config = true, opts = ... },
+  { "ellisonleao/gruvbox.nvim", priority = 1000, config = true, opts = { editor = { transparent_background = true } } },
   --
   -- everviolet theme config
   {
@@ -157,5 +157,30 @@ return {
         },
       },
     },
+  },
+  -- nordic theme config
+  {
+    "AlexvZyl/nordic.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      require("nordic").setup({
+        transparent = {
+          bg = true,
+          float = false,
+        },
+        bright_border = true,
+        bold_keywords = false,
+        italic_comments = true,
+        telescope = {
+          style = "flat",
+        },
+        cursorline = {
+          bold = true,
+          theme = "dark",
+        },
+      })
+      vim.cmd.colorscheme("nordic")
+    end,
   },
 }

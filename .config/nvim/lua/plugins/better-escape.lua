@@ -2,11 +2,41 @@ return {
   "max397574/better-escape.nvim",
   event = "InsertEnter",
   config = function()
+    -- lua, default settings
     require("better_escape").setup({
-      mapping = { "jk", "jj" }, -- a table with mappings to use
-      timeout = vim.o.timeoutlen, -- the time in which the keys must be hit in ms. Use option timeoutlen by default
-      clear_empty_lines = false, -- clear line after escaping if there is only whitespace
-      keys = "<Esc>", -- keys used for escaping, if it is a function will be called every time to calculate the keys
+      timeout = vim.o.timeoutlen, -- after `timeout` passes, you can press the escape key and the plugin will ignore it
+      default_mappings = true, -- setting this to false removes all the default mappings
+      mappings = {
+        -- i for insert
+        i = {
+          j = {
+            -- These can all also be functions
+            k = "<Esc>",
+            j = "<Esc>",
+          },
+        },
+        c = {
+          j = {
+            k = "<C-c>",
+            j = "<C-c>",
+          },
+        },
+        t = {
+          j = {
+            k = "<C-\\><C-n>",
+          },
+        },
+        v = {
+          j = {
+            k = "<Esc>",
+          },
+        },
+        s = {
+          j = {
+            k = "<Esc>",
+          },
+        },
+      },
     })
   end,
 }

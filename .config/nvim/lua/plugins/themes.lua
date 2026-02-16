@@ -91,6 +91,20 @@ return {
       vim.cmd("colorscheme miasma")
     end,
   },
+  -- Vague theme
+  {
+    "vague-theme/vague.nvim",
+    lazy = false, -- make sure we load this during startup if it is your main colorscheme
+    priority = 1000, -- make sure to load this before all the other plugins
+    config = function()
+      -- NOTE: you do not need to call setup if you don't want to.
+      require("vague").setup({
+        -- optional configuration here
+        transparent = true,
+      })
+      vim.cmd("colorscheme vague")
+    end,
+  },
   {
     "datsfilipe/vesper.nvim",
     lazy = false,
@@ -167,7 +181,7 @@ return {
       require("nordic").setup({
         transparent = {
           bg = true,
-          float = false,
+          float = true,
         },
         bright_border = true,
         bold_keywords = false,
@@ -183,4 +197,23 @@ return {
       vim.cmd.colorscheme("nordic")
     end,
   },
+  -- vscode theme config
+  {
+    "Mofiqul/vscode.nvim",
+    lazy = false,
+    priority = 0,
+    config = function()
+      require("vscode").setup({
+        -- Enable transparent background
+        transparent = true,
+        -- Enable italic comment
+        italic_comments = true,
+        -- Disable nvim-tree background color
+        disable_nvimtree_bg = true,
+      })
+      -- Uncomment the line below to use vscode theme
+      -- vim.cmd("colorscheme vscode")
+    end,
+  },
+  -- compline theme config
 }

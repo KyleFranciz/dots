@@ -15,11 +15,11 @@ config.initial_cols = 120
 config.initial_rows = 28
 
 -- font settings and line_height
-config.font_size = 23
+config.font_size = 20
 config.line_height = 1.4
 -- config.font = wezterm.font("Hack Nerd Font Mono")
-config.font = wezterm.font("DankMono Nerd Font", { bold = true })
--- config.font = wezterm.font("JetBrainsMonoNL Nerd Font Mono", { italic = false })
+-- config.font = wezterm.font("DankMono Nerd Font", { bold = true })
+config.font = wezterm.font("JetBrainsMonoNL Nerd Font Mono", { italic = true, bold = false })
 -- config.font = wezterm.font("FiraCode Nerd Font Mono")
 
 -- color schemes that I like
@@ -73,7 +73,7 @@ config.window_padding = {
 -- Tab Bar Appearance
 
 -- Background Appearance
-config.window_background_opacity = 0.90
+config.window_background_opacity = 0.85
 -- config.macos_window_background_blur = 70
 config.text_background_opacity = 6
 

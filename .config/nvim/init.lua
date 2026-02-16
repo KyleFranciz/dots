@@ -6,8 +6,10 @@ require("config.lazy")
 
 -- colorscheme for nvim when launched
 -- favorite themes
--- vim.cmd.colorscheme("evergarden")
-vim.cmd.colorscheme("nordic")
+vim.cmd.colorscheme("evergarden")
+-- vim.cmd.colorscheme("vague")
+-- vim.cmd.colorscheme("nordic")
+-- vim.cmd.colorscheme("miasma")
 -- vim.cmd.colorscheme("tokyonight")
 -- vim.cmd.colorscheme("evergarden-spring")
 

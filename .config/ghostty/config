@@ -1,40 +1,58 @@
 
 # set up for the font style 
 # font-family = "JetBrainsMono Nerd Font"
-# font-family = FiraCode Nerd Font
-font-family = caskaydiaMono Nerd Font
-font-size = 22
+font-family = FiraCode Nerd Font
+# font-family = caskaydiaMono Nerd Font
+# font-family = DankMono Nerd Font Mono 
+# font-family = "Code New Roman"
+# font-family = "Iosevka SS02"
+font-size = 21
+adjust-cell-height = 55%
 
 # Font variations
-font-style = normal
+font-style = italic
+font-variation = ital=1
 
-# ligatures and contextual alternates
+# ligatures and contextual alternates =>
 font-feature = +liga  # Enable ligatures
 font-feature = +calt  # Enable contextual alternates
+font-feature = feat on
 
 # Set up quake-style dropdown with Ctrl + /
 keybind = global:ctrl+slash=toggle_quick_terminal
+
+# setting for resetting the config
+keybind = cmd+s>r=reload_config
 
 # Optional: animation speed (in seconds)
 # quick-terminal-animation-duration = 0.1
 
 # Window settings
-title = ""
+title = "Neovim"
 macos-titlebar-style = hidden
+window-subtitle = working-directory
+window-title-font-family = true
+window-new-tab-position = current
+window-save-state = always
 
 
 # Window size (columns x rows)
-window-width = 180
-window-height = 65
+window-width = 150
+window-height = 45
 window-padding-x = 20
 window-padding-y = 20
 window-padding-balance = true
+
+# keybinds for the window 
 
 # Setting for auto updating
 auto-update = check
 
 #Shaders
 # custom-shader = ./shaders/ghostty-shaders/bettercrt.glsl
+# custom-shader = ./shaders/ghostty-shaders/bloom.glsl
+# custom-shader = ./shaders/ghostty-shaders/cursor_blaze.glsl
+# custom-shader = ./shaders/ghostty-shaders/gradient-background.glsl
 
 # Themes
 # theme = gotham-default
@@ -43,21 +61,67 @@ auto-update = check
 # theme = gruvbox-dark
 # theme = nord
 # theme = 3024 night
-# theme = BlueDolphin
-# theme = DjangoRebornAgain
-# theme = NvimDark
-# theme = PaleNightHC
-theme = Arthur 
+# theme = Arthur 
 # theme = jubi
+# theme = Everforest Dark Hard
 
+# #Github Theme
+# background = #010409
+# foreground = #e6edf3
+# selection-background = #264f78
+# selection-foreground = #e6edf3
+# cursor-color = #e6edf3
+# cursor-text = #010409
+# palette = 0=#484f58
+# palette = 1=#ff7b72
+# palette = 2=#3fb950
+# palette = 3=#d29922
+# palette = 4=#58a6ff
+# palette = 5=#bc8cff
+# palette = 6=#39c5cf
+# palette = 7=#b1bac4
+# palette = 8=#6e7681
+# palette = 9=#ffa198
+# palette = 10=#56d364
+# palette = 11=#e3b341
+# palette = 12=#79c0ff
+# palette = 13=#d2a8ff
+# palette = 14=#56d4dd
+# palette = 15=#ffffff
 
+# Srcery Theme
+# background = #1c1b19
+# foreground = #fce8c3
+# selection-background = #fce8c3
+# selection-foreground = #1c1b19
+# # cursor-color = #fbb829
+# cursor-text = #1c1b19
+# palette = 0=#1c1b19
+# palette = 1=#ef2f27
+# palette = 2=#519f50
+# palette = 3=#fbb829
+# palette = 4=#2c78bf
+# palette = 5=#e02c6d
+# palette = 6=#0aaeb3
+# palette = 7=#baa67f
+# palette = 8=#918175
+# palette = 9=#f75341
+# palette = 10=#98bc37
+# palette = 11=#fed06e
+# palette = 12=#68a8e4
+# palette = 13=#ff5c8f
+# palette = 14=#2be4d0
+# palette = 15=#fce8c3
+#
 
 # Transparency settings
-background-opacity = 0.65
-background-blur-radius = 17
+# background-opacity = 0.80
+# background-blur-radius = 20
 
 # Cursor settings
 cursor-style-blink = true
 cursor-style = block
 
+# settings for the mouse when typing
+mouse-hide-while-typing = true
 

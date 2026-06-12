@@ -1,0 +1,6 @@
+.claude
+.raycast/
+.DS_Store
+*.swp
+*.tmp
+*.local

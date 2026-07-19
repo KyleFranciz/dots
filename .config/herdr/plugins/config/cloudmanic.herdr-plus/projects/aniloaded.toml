@@ -1,0 +1,40 @@
+name = "Aniloaded"
+description = "For working on Aniloaded"
+working_dir = "~/Desktop/Development/Coding Projects/AniLoaded/App/"
+
+# 1. Nvim Editor and Opencode
+[[tabs]]
+name = "Nvim + OC"
+
+[[tabs.panes]]
+label = "Nvim"
+command = "nvim"
+
+[[tabs.panes]]
+label = "OC"
+command = "oc"
+split = "right"
+
+# 2. Server tab
+[[tabs]]
+name = "Server"
+
+[[tabs.panes]]
+label = "Frontend"
+command = "cd ~/Desktop/Development/Coding\\ Projects/AniLoaded/App/frontend && $SHELL"
+
+[[tabs.panes]]
+label = "Backend"
+command = "cd ~/Desktop/Development/Coding\\ Projects/AniLoaded/App/backend && $SHELL"
+split = "right"
+
+# 3. Lazygit tab
+[[tabs]]
+name = "Lazygit"
+command = "lazygit"
+
+# 4. Diff View
+[[tabs]]
+name = "Diff View"
+command = "hunk diff --watch"
+

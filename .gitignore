@@ -4,3 +4,11 @@
 *.swp
 *.tmp
 *.local
+
+# App-managed artifacts
+.config/.vscode/extensions/
+.config/raycast/extensions/
+.config/tmux/.tmux/plugins/
+.config/.tmux/plugins/
+.config/opencode/node_modules/
+.config/ghostty/config.save

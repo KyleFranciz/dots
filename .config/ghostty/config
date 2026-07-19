@@ -1,17 +1,17 @@
 
 # set up for the font style 
-# font-family = "JetBrainsMono Nerd Font"
-font-family = FiraCode Nerd Font
+font-family = "JetBrainsMono Nerd Font"
+# font-family = FiraCode Nerd font-family
 # font-family = caskaydiaMono Nerd Font
 # font-family = DankMono Nerd Font Mono 
 # font-family = "Code New Roman"
 # font-family = "Iosevka SS02"
-font-size = 21
+font-size = 21.5
 adjust-cell-height = 55%
 
 # Font variations
-font-style = italic
-font-variation = ital=1
+# font-style = italic
+# font-variation = ital=1
 
 # ligatures and contextual alternates =>
 font-feature = +liga  # Enable ligatures
@@ -55,7 +55,7 @@ auto-update = check
 # custom-shader = ./shaders/ghostty-shaders/gradient-background.glsl
 
 # Themes
-# theme = gotham-default
+theme = gotham-default
 # theme = rose-pine
 # theme = monokai-pro-octagon
 # theme = gruvbox-dark
@@ -115,8 +115,8 @@ auto-update = check
 #
 
 # Transparency settings
-# background-opacity = 0.80
-# background-blur-radius = 20
+background-opacity = 0.75
+background-blur-radius = 30
 
 # Cursor settings
 cursor-style-blink = true

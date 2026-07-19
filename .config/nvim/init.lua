@@ -6,6 +6,7 @@ require("config.lazy")
 
 -- colorscheme for nvim when launched
 -- favorite themes
+-- vim.cmd.colorscheme("vesper")
 vim.cmd.colorscheme("evergarden")
 -- vim.cmd.colorscheme("vague")
 -- vim.cmd.colorscheme("nordic")

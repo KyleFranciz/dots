@@ -215,5 +215,14 @@ return {
       -- vim.cmd("colorscheme vscode")
     end,
   },
-  -- compline theme config
+  --  kanagawa theme
+  {
+    "thesimonho/kanagawa-paper.nvim",
+    lazy = false,
+    priority = 1000,
+    init = function()
+      vim.cmd.colorscheme("kanagawa-paper-ink")
+    end,
+    opts = { ... },
+  },
 }

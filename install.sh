@@ -2,59 +2,50 @@
 set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKUP_DIR="$HOME/.dotfiles-backups/$(date +%Y%m%d-%H%M%S)"
+TARGET_DIR="$HOME"
 
-link_path() {
-  local source_path="$1"
-  local target_path="$2"
+DOTFILES_PACKAGES=(git)
+PACKAGES=(
+  borders
+  ghostty
+  herdr
+  kitty
+  nvim
+  opencode
+  starship
+  tmux
+  vscode
+  wezterm
+  zsh
+)
 
-  mkdir -p "$(dirname "$target_path")"
-
-  if [ -L "$target_path" ]; then
-    rm -f "$target_path"
-  elif [ -e "$target_path" ]; then
-    mkdir -p "$BACKUP_DIR/$(dirname "$target_path")"
-    mv "$target_path" "$BACKUP_DIR/$target_path"
-    echo "Backed up $target_path -> $BACKUP_DIR/$target_path"
-  fi
-
-  ln -s "$source_path" "$target_path"
-  echo "Linked $target_path -> $source_path"
-}
-
-link_if_exists() {
-  local source_path="$1"
-  local target_path="$2"
-
-  if [ -e "$source_path" ] || [ -L "$source_path" ]; then
-    link_path "$source_path" "$target_path"
-  fi
-}
-
-link_if_exists "$DOTFILES_DIR/.config/starship" "$HOME/.config/starship"
-link_if_exists "$DOTFILES_DIR/.config/tmux" "$HOME/.config/tmux"
-link_if_exists "$DOTFILES_DIR/.config/tmux/tmux.conf" "$HOME/.tmux.conf"
-link_if_exists "$DOTFILES_DIR/.config/nvim" "$HOME/.config/nvim"
-link_if_exists "$DOTFILES_DIR/.config/ghostty" "$HOME/.config/ghostty"
-link_if_exists "$DOTFILES_DIR/.config/kitty" "$HOME/.config/kitty"
-link_if_exists "$DOTFILES_DIR/.config/borders" "$HOME/.config/borders"
-link_if_exists "$DOTFILES_DIR/.config/opencode" "$HOME/.config/opencode"
-link_if_exists "$DOTFILES_DIR/.config/wezterm" "$HOME/.config/wezterm"
-
-link_if_exists "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
-link_if_exists "$DOTFILES_DIR/.gitconfig" "$HOME/.gitconfig"
-
-VSCODE_APP_SUPPORT="$HOME/Library/Application Support/Code"
-VSCODE_USER_DIR="$VSCODE_APP_SUPPORT/User"
-link_if_exists "$DOTFILES_DIR/.config/.vscode/argv.json" "$VSCODE_APP_SUPPORT/argv.json"
-
-if [ -d "$DOTFILES_DIR/.config/.vscode/cli" ]; then
-  link_path "$DOTFILES_DIR/.config/.vscode/cli" "$VSCODE_APP_SUPPORT/cli"
+if ! command -v stow >/dev/null 2>&1; then
+  echo "GNU Stow is required but not installed." >&2
+  echo "macOS: brew install stow" >&2
+  exit 1
 fi
 
-link_if_exists "$DOTFILES_DIR/.config/.vscode/User/settings.json" "$VSCODE_USER_DIR/settings.json"
-link_if_exists "$DOTFILES_DIR/.config/.vscode/User/keybindings.json" "$VSCODE_USER_DIR/keybindings.json"
-link_if_exists "$DOTFILES_DIR/.config/.vscode/User/snippets" "$VSCODE_USER_DIR/snippets"
+cd "$DOTFILES_DIR"
 
-echo "Dotfiles installed from $DOTFILES_DIR"
-echo "VS Code extensions are not linked; reinstall them separately if needed."
+mkdir -p "$HOME/.config"
+
+echo "Stowing dotfile packages into $TARGET_DIR"
+for pkg in "${DOTFILES_PACKAGES[@]}"; do
+  if [ -d "$pkg" ]; then
+    echo "  stow --dotfiles -R $pkg"
+    stow --dotfiles -R -t "$TARGET_DIR" "$pkg"
+  fi
+done
+
+for pkg in "${PACKAGES[@]}"; do
+  if [ -d "$pkg" ]; then
+    echo "  stow -R $pkg"
+    stow -R -t "$TARGET_DIR" "$pkg"
+  fi
+done
+
+echo
+
+echo "Done."
+echo "Preview changes with: stow -n -v -R <package>"
+echo "Remove a package with: stow -D <package>"

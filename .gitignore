@@ -1,14 +1,9 @@
-.claude
-.raycast/
-.DS_Store
-*.swp
-*.tmp
-*.local
+# Generated/editor-managed content
+vscode/.config/.vscode/extensions/
 
-# App-managed artifacts
-.config/.vscode/extensions/
-.config/raycast/extensions/
-.config/tmux/.tmux/plugins/
-.config/.tmux/plugins/
-.config/opencode/node_modules/
-.config/ghostty/config.save
+# Local plugin installs / vendored repos
+tmux/.config/tmux/.tmux/
+tmux/.config/tmux/plugins/
+
+# Cloned repos inside config folders
+**/.git

@@ -1,1 +1,5 @@
 .raycast/
+raycast/
+.vscode/extensions
+.tmux/
+# Managed from repo root for cross-directory ignores

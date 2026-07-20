@@ -1,0 +1,9 @@
+# Set up quake-style dropdown with Ctrl + `
+keybind = global:super+z=toggle_quick_terminal
+
+# Optional: animation speed (in seconds)
+quick-terminal-animation-duration = 0.1
+
+# Optional: height (in rows or % of screen)
+quick-terminal-height = 50%
+

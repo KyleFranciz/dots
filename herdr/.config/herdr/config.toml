@@ -115,6 +115,12 @@ type = "plugin_action"
 command = "cloudmanic.herdr-plus.projects"
 description = "herdr-plus: projects"
 
+[[keys.command]]
+key = "prefix+ctrl+a"
+type = "plugin_action"
+command = "cloudmanic.herdr-plus.quick-actions"
+description = "herdr-plus: quick actions"
+
 #tmux-like popup/tool shortcuts where Herdr supports custom commands.
 [[keys.command]]
 key = "prefix+ctrl+y"
@@ -220,7 +226,7 @@ show_agent_labels_on_pane_borders = true
 # delivery = "off"
 # delay_seconds = 1
 
-delivery = "herdr"
+delivery = "system"
 [ui.toast.herdr]
 # position = "bottom-right"
 

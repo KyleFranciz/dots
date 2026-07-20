@@ -55,7 +55,8 @@ auto-update = check
 # custom-shader = ./shaders/ghostty-shaders/gradient-background.glsl
 
 # Themes
-theme = gotham-default
+# theme = gotham-default
+theme = github-dark
 # theme = rose-pine
 # theme = monokai-pro-octagon
 # theme = gruvbox-dark

@@ -10,26 +10,26 @@
     "opacity": 0.5,
     "transparent": true,
     "backgroundColor": "#00000000",
-    "vibrancy": "ultra-dark"
+    "vibrancy": "ultra-dark",
   },
   "animations.Enabled": true,
   "animations.Scrolling": "Slide",
   "animations.CursorAnimationOptions": {
     "CursorStyle": "line",
-    "TrailLength": 12
+    "TrailLength": 12,
   },
   "vscode_custom_css.imports": [
-    "file:///Users/blase/.vscode/extensions/brandonkirbyson.vscode-animations-2.0.4/dist/updateHandler.js"
+    "file:///Users/blase/.vscode/extensions/brandonkirbyson.vscode-animations-2.0.4/dist/updateHandler.js",
   ],
   "background.fullscreen": {
     "images": [
-      "https://motionbgs.com/media/4423/miyamoto-musashi-vagabond.jpg"
+      "https://motionbgs.com/media/4423/miyamoto-musashi-vagabond.jpg",
     ],
     "opacity": 0.1,
     "size": "cover",
     "position": "center",
     "interval": 0,
-    "random": false
+    "random": false,
   },
   "background.sidebar": {},
   "background.panel": {},
@@ -44,7 +44,7 @@
   "editor.cursorStyle": "line",
   "frosted-glass-theme.fakeMica.enabled": true,
   "workbench.colorCustomizations": {
-    "terminal.background": "#00000000"
+    "terminal.background": "#00000000",
   },
   "workbench.settings.applyToAllProfiles": ["workbench.colorCustomizations"],
   "vscode_vibrancy.opacity": -0.3,
@@ -63,7 +63,7 @@
     "linear": {
       "command": "npx",
       "env": {},
-      "args": ["-y", "mcp-remote", "https://mcp.linear.app/sse"]
+      "args": ["-y", "mcp-remote", "https://mcp.linear.app/sse"],
     },
     "Framelink Figma MCP": {
       "command": "npx",
@@ -72,21 +72,21 @@
         "-y",
         "figma-developer-mcp",
         "--figma-api-key=REDACTED",
-        "--stdio"
-      ]
+        "--stdio",
+      ],
     },
     "notion": {
       "command": "npx",
       "env": {
-        "NOTION_API_TOKEN": "REDACTED"
+        "NOTION_API_TOKEN": "REDACTED",
       },
-      "args": ["-y", "@suekou/mcp-notion-server"]
-    }
+      "args": ["-y", "@suekou/mcp-notion-server"],
+    },
   },
   "editor.scrollbar.verticalScrollbarSize": 12,
   "window.titleBarStyle": "custom",
   "workbench.editor.autoLockGroups": {
-    "terminalEditor": false
+    "terminalEditor": false,
   },
   "chat.commandCenter.enabled": false,
   "codium.codeCompletion.enable": true,
@@ -107,12 +107,22 @@
     "editor.quickSuggestions": {
       "other": true,
       "comments": false,
-      "strings": true
+      "strings": true,
     },
-    "editor.defaultFormatter": "redhat.vscode-yaml"
+    "editor.defaultFormatter": "redhat.vscode-yaml",
   },
   "[github-actions-workflow]": {
-    "editor.defaultFormatter": "redhat.vscode-yaml"
+    "editor.defaultFormatter": "redhat.vscode-yaml",
   },
-  "chat.useAgentSkills": true
+  "chat.useAgentSkills": true,
+  "yaml.disableSchemaDetection": [
+    "**/docker-compose.yml",
+    "**/docker-compose.yaml",
+    "**/docker-compose.*.yml",
+    "**/docker-compose.*.yaml",
+    "**/compose.yml",
+    "**/compose.yaml",
+    "**/compose.*.yml",
+    "**/compose.*.yaml",
+  ],
 }

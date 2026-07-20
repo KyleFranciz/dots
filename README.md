@@ -1,33 +1,65 @@
 # dotfiles
 
-Personal shell, terminal, tmux, and editor config.
+Personal shell, terminal, tmux, editor, and Herdr config managed with GNU Stow.
 
-## Included
-- `.config/starship/`
-- `.config/tmux/`
-- `.config/nvim/`
-- `.config/ghostty/`
-- `.config/kitty/`
-- `.config/borders/`
-- `.config/opencode/`
-- `.config/wezterm/`
-- `.config/.vscode/argv.json`
-- `.config/.vscode/User/settings.json`
-- `.config/.vscode/User/keybindings.json`
-- `.config/.vscode/User/snippets/`
-- `.zshrc`
-- `.gitconfig`
+## Packages
+- `git/`
+- `zsh/`
+- `borders/`
+- `ghostty/`
+- `herdr/`
+- `kitty/`
+- `nvim/`
+- `opencode/`
+- `starship/`
+- `tmux/`
+- `vscode/`
+- `wezterm/`
 
 ## Install
+Prerequisite:
+```bash
+brew install stow
+```
+
+Then:
 ```bash
 git clone <your-repo-url> ~/dotfiles
 cd ~/dotfiles
 ./install.sh
 ```
 
-This will symlink the tracked config directories into their expected home-directory locations.
+## Manual usage
+Stow everything tracked here:
+```bash
+cd ~/dotfiles
+stow --dotfiles -R git
+stow -R zsh borders ghostty herdr kitty nvim opencode starship tmux vscode wezterm
+```
 
-Notes:
-- VS Code extensions are intentionally not symlinked; reinstall them separately.
-- tmux plugins are expected to be installed by TPM rather than committed into this repo.
+Preview without changing anything:
+```bash
+stow -n -v -R nvim
+```
+
+Remove one package:
+```bash
+stow -D nvim
+```
+
+## Layout
+Each package mirrors its destination under `$HOME`.
+
+Examples:
+- `tmux/.config/tmux/tmux.conf` -> `~/.config/tmux/tmux.conf`
+- `tmux/.tmux.conf` -> `~/.tmux.conf`
+- `herdr/.config/herdr/config.toml` -> `~/.config/herdr/config.toml`
+- `herdr/.config/herdr/plugins/config/cloudmanic.herdr-plus/...` -> `~/.config/herdr/plugins/config/cloudmanic.herdr-plus/...`
+- `git/dot-gitconfig` -> `~/.gitconfig`
+- `git/dot-gitignore` -> `~/.gitignore`
+
+## Notes
+- `git/` uses Stow's `--dotfiles` mode, so files are stored as `dot-*` in the repo.
+- VS Code extensions are intentionally not tracked here.
+- Herdr runtime state such as logs, sockets, sessions, and installed plugin code is intentionally not tracked.
 - If any config contains private tokens or API keys, keep them out of git or replace them with local secrets after install.

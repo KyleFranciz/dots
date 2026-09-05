@@ -1,6 +1,9 @@
 # THIS IS THE CONFIG FOR MY ZSH (EVERY PLUGIN AND COMMAND IS SET UP HERE)
-# Starship config path (prompt init is loaded near the end for best compatibility)
-export STARSHIP_CONFIG="$HOME/.config/starship/starship.toml"
+
+# Enable Powerlevel10k instant prompt. Keep this near the top of ~/.zshrc.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
@@ -12,13 +15,15 @@ export PATH="/opt/homebrew/bin:$PATH"
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
+
+
 export EDITOR="nvim"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-# ZSH_THEME="powerlevel10k/powerlevel10k"
+ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -82,12 +87,14 @@ export EDITOR="nvim"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 
+fpath=(~/.zsh/completions $fpath)
 source $ZSH/oh-my-zsh.sh
 
 # Aliases
 alias ls="ls --color"
 
 alias oc="opencode"
+alias sc="sesh connect ."
 
 # User configuration
 
@@ -120,10 +127,11 @@ alias inv='nvim $(fzf --preview="bat --color=always {}")'
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-# [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # set up the fzf key bindings and fuzzy completion
 eval "$(fzf --zsh)"
+eval "$(zoxide init zsh)"
 
 # Yazi function to change directory on exit
 function y() {
@@ -144,16 +152,8 @@ export PATH=$PATH:/Users/blase/.spicetify
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/blase/.lmstudio/bin"
 # End of LM Studio CLI section
-
-# Initialize Starship prompt at the end of .zshrc
-eval "$(starship init zsh)"
-

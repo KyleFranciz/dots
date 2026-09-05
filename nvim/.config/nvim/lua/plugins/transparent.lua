@@ -31,10 +31,16 @@ return {
         "CursorLineNr",
         "EndOfBuffer",
       },
-      extra_groups = {}, -- table: additional groups that should be cleared
+      extra_groups = {
+        "NormalFloat",
+        "FloatBorder",
+        "StatusLine",
+        "StatusLineNC",
+        "TabLine",
+      }, -- keep completion menu backgrounds visible
       exclude_groups = {}, -- table: groups you don't want to clear
     })
-    -- Disable transparency by default
-    vim.cmd("TransparentDisable")
+    -- Enable transparency by default
+    vim.cmd("TransparentEnable")
   end,
 }

@@ -7,7 +7,9 @@ require("config.lazy")
 -- colorscheme for nvim when launched
 -- favorite themes
 -- vim.cmd.colorscheme("vesper")
-vim.cmd.colorscheme("evergarden")
+-- vim.cmd.colorscheme("guts")
+vim.cmd.colorscheme("everforest")
+-- vim.cmd.colorscheme("evergarden")
 -- vim.cmd.colorscheme("vague")
 -- vim.cmd.colorscheme("nordic")
 -- vim.cmd.colorscheme("miasma")
@@ -19,3 +21,7 @@ vim.cmd.colorscheme("evergarden")
 -- other colorthemes that I may switch to
 -- vim.cmd.colorscheme("tokyonight")
 -- vim.cmd.colorscheme("miasma")
+
+-- spell check
+vim.opt.spell = true
+vim.opt.spelllang = { "en_us" }

@@ -11,6 +11,7 @@ Personal shell, terminal, tmux, editor, and Herdr config managed with GNU Stow.
 - `kitty/`
 - `nvim/`
 - `opencode/`
+- `pi/`
 - `starship/`
 - `tmux/`
 - `vscode/`
@@ -34,7 +35,7 @@ Stow everything tracked here:
 ```bash
 cd ~/dotfiles
 stow --dotfiles -R git
-stow -R zsh borders ghostty herdr kitty nvim opencode starship tmux vscode wezterm
+stow -R zsh borders ghostty herdr kitty nvim opencode pi starship tmux vscode wezterm
 ```
 
 Preview without changing anything:
@@ -55,6 +56,9 @@ Examples:
 - `tmux/.tmux.conf` -> `~/.tmux.conf`
 - `herdr/.config/herdr/config.toml` -> `~/.config/herdr/config.toml`
 - `herdr/.config/herdr/plugins/config/cloudmanic.herdr-plus/...` -> `~/.config/herdr/plugins/config/cloudmanic.herdr-plus/...`
+- `pi/.pi/agent/settings.json` -> `~/.pi/agent/settings.json`
+- `pi/.pi/agent/extensions/` -> `~/.pi/agent/extensions/`
+- `pi/.pi/agent/skills/` -> `~/.pi/agent/skills/`
 - `git/dot-gitconfig` -> `~/.gitconfig`
 - `git/dot-gitignore` -> `~/.gitignore`
 
@@ -62,4 +66,5 @@ Examples:
 - `git/` uses Stow's `--dotfiles` mode, so files are stored as `dot-*` in the repo.
 - VS Code extensions are intentionally not tracked here.
 - Herdr runtime state such as logs, sockets, sessions, and installed plugin code is intentionally not tracked.
+- Pi auth, trust decisions, model cache, sessions, and todos are intentionally not tracked.
 - If any config contains private tokens or API keys, keep them out of git or replace them with local secrets after install.

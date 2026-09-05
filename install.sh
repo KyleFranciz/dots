@@ -12,6 +12,7 @@ PACKAGES=(
   kitty
   nvim
   opencode
+  pi
   starship
   tmux
   vscode

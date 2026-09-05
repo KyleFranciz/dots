@@ -1,18 +1,17 @@
 
 # set up for the font style 
-font-family = "JetBrainsMono Nerd Font"
+# font-family = "JetBrainsMono Nerd Font"
 # font-family = FiraCode Nerd font-family
 # font-family = caskaydiaMono Nerd Font
 # font-family = DankMono Nerd Font Mono 
 # font-family = "Code New Roman"
-# font-family = "Iosevka SS02"
-font-size = 21.5
+font-family = "Iosevka SS02"
+font-size = 16
 adjust-cell-height = 55%
 
 # Font variations
 # font-style = italic
 # font-variation = ital=1
-
 # ligatures and contextual alternates =>
 font-feature = +liga  # Enable ligatures
 font-feature = +calt  # Enable contextual alternates
@@ -56,13 +55,13 @@ auto-update = check
 
 # Themes
 # theme = gotham-default
-theme = github-dark
+# theme = github-dark
 # theme = rose-pine
 # theme = monokai-pro-octagon
 # theme = gruvbox-dark
 # theme = nord
 # theme = 3024 night
-# theme = Arthur 
+theme = Arthur
 # theme = jubi
 # theme = Everforest Dark Hard
 
@@ -113,15 +112,14 @@ theme = github-dark
 # palette = 13=#ff5c8f
 # palette = 14=#2be4d0
 # palette = 15=#fce8c3
-#
 
 # Transparency settings
-background-opacity = 0.75
-background-blur-radius = 30
+background-opacity = .60
+background-blur-radius = 50
 
 # Cursor settings
 cursor-style-blink = true
-cursor-style = block
+cursor-style = bar
 
 # settings for the mouse when typing
 mouse-hide-while-typing = true

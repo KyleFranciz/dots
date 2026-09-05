@@ -4,7 +4,7 @@ return {
   dependencies = {
     -- Recommended for `ask()` and `select()`.
     -- Required for `toggle()`.
-    { "folke/snacks.nvim", opts = { input = {}, picker = {} } },
+    { "folke/snacks.nvim", opts = { input = {}, picker = {}, terminal = {} } },
   },
   config = function()
     vim.g.opencode_opts = {
@@ -27,6 +27,12 @@ return {
     vim.keymap.set("n", "<leader>ot", function()
       require("opencode").toggle()
     end, { desc = "Toggle embedded" })
+    vim.keymap.set({ "n", "t" }, "<C-/>", function()
+      Snacks.terminal()
+    end, { desc = "Toggle floating terminal" })
+    vim.keymap.set({ "n", "t" }, "<C-_>", function()
+      Snacks.terminal()
+    end, { desc = "Toggle floating terminal" })
     vim.keymap.set("n", "<leader>oc", function()
       require("opencode").command()
     end, { desc = "Select command" })

@@ -6,16 +6,16 @@
 # font-family = DankMono Nerd Font Mono 
 # font-family = "Code New Roman"
 font-family = "Iosevka SS02"
-font-size = 16
-adjust-cell-height = 55%
+font-size = 15.5
+adjust-cell-height = 50%
 
 # Font variations
 # font-style = italic
 # font-variation = ital=1
 # ligatures and contextual alternates =>
-font-feature = +liga  # Enable ligatures
-font-feature = +calt  # Enable contextual alternates
-font-feature = feat on
+# font-feature = +liga  # Enable ligatures
+# font-feature = +calt  # Enable contextual alternates
+# font-feature = feat on
 
 # Set up quake-style dropdown with Ctrl + /
 keybind = global:ctrl+slash=toggle_quick_terminal
@@ -52,16 +52,17 @@ auto-update = check
 # custom-shader = ./shaders/ghostty-shaders/bloom.glsl
 # custom-shader = ./shaders/ghostty-shaders/cursor_blaze.glsl
 # custom-shader = ./shaders/ghostty-shaders/gradient-background.glsl
+custom-shader = ./shaders/space.glsl
 
 # Themes
 # theme = gotham-default
 # theme = github-dark
 # theme = rose-pine
 # theme = monokai-pro-octagon
-# theme = gruvbox-dark
+# theme = Gruvbox Dark
 # theme = nord
-# theme = 3024 night
-theme = Arthur
+theme = 3024 night
+# theme = Arthur
 # theme = jubi
 # theme = Everforest Dark Hard
 
@@ -114,8 +115,9 @@ theme = Arthur
 # palette = 15=#fce8c3
 
 # Transparency settings
-background-opacity = .60
-background-blur-radius = 50
+# background-opacity = 1
+background-opacity = .85
+background-blur-radius = 65
 
 # Cursor settings
 cursor-style-blink = true

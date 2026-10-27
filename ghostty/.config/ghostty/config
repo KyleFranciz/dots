@@ -61,10 +61,10 @@ custom-shader = ./shaders/space.glsl
 # theme = monokai-pro-octagon
 # theme = Gruvbox Dark
 # theme = nord
-theme = 3024 night
+# theme = 3024 night
 # theme = Arthur
 # theme = jubi
-# theme = Everforest Dark Hard
+theme = Everforest Dark Hard
 
 # #Github Theme
 # background = #010409

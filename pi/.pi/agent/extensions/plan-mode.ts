@@ -1,564 +1,159 @@
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { Key } from "@mariozechner/pi-tui";
 
 interface PlanStep {
   step: number;
   text: string;
-  completed: boolean;
 }
-
-type PlanPhase = "planning" | "clarifying" | "ready" | "executing";
 
 interface PlanState {
   enabled: boolean;
-  pendingPlan: string | null;
+  execution: boolean;
+  plan: string | null;
   steps: PlanStep[];
   normalTools: string[];
-  phase: PlanPhase;
-  currentStepIndex: number;
 }
 
-const PLAN_TOOLS = ["read", "bash", "grep", "find", "ls"];
-
-const DESTRUCTIVE_PATTERNS = [
-  /\brm\b/i,
-  /\bmv\b/i,
-  /\bcp\b/i,
-  /\bmkdir\b/i,
-  /\btouch\b/i,
-  /\bchmod\b/i,
-  /\bchown\b/i,
-  /\bnpm\s+(install|uninstall|update|ci|publish)/i,
-  /\byarn\s+(add|remove|install|upgrade)/i,
-  /\bpnpm\s+(add|remove|install|upgrade)/i,
-  /\bpip\s+(install|uninstall)/i,
-  /\bgit\s+(add|commit|push|pull|merge|rebase|reset|checkout|stash|tag)/i,
-  /\bsudo\b/i,
-  /(^|[^<])>(?!>)/,
-  />>/,
+const READ_ONLY_TOOLS = ["read", "bash", "grep", "find", "ls"];
+const DESTRUCTIVE = [
+  /\brm\b/i, /\bmv\b/i, /\bcp\b/i, /\bmkdir\b/i, /\btouch\b/i,
+  /\bchmod\b/i, /\bchown\b/i, /\b(sudo|npm\s+(install|uninstall|update|ci|publish)|yarn\s+(add|remove|install|upgrade)|pnpm\s+(add|remove|install|upgrade)|pip\s+(install|uninstall))\b/i,
+  /\bgit\s+(add|commit|push|pull|merge|rebase|reset|checkout|stash|tag)\b/i,
+  /(^|[^<])>(?!>)/, />>/,
 ];
+const SAFE_BASH = [/^\s*(cat|head|tail|less|more|grep|rg|find|fd|ls|pwd|tree)\b/i,
+  /^\s*git\s+(status|log|diff|show|branch)\b/i,
+  /^\s*npm\s+(list|ls|view|info|outdated|audit)\b/i,
+  /^\s*(node|python)\s+--version\b/i, /^\s*(uname|whoami|date|uptime)\b/i];
 
-const SAFE_BASH_PATTERNS = [
-  /^\s*cat\b/i,
-  /^\s*head\b/i,
-  /^\s*tail\b/i,
-  /^\s*less\b/i,
-  /^\s*more\b/i,
-  /^\s*grep\b/i,
-  /^\s*find\b/i,
-  /^\s*rg\b/i,
-  /^\s*fd\b/i,
-  /^\s*ls\b/i,
-  /^\s*pwd\b/i,
-  /^\s*tree\b/i,
-  /^\s*git\s+(status|log|diff|show|branch)/i,
-  /^\s*npm\s+(list|ls|view|info|outdated|audit)/i,
-  /^\s*node\s+--version/i,
-  /^\s*python\s+--version/i,
-  /^\s*uname\b/i,
-  /^\s*whoami\b/i,
-  /^\s*date\b/i,
-  /^\s*uptime\b/i,
-];
-
-function isSafeCommand(command: string): boolean {
-  const destructive = DESTRUCTIVE_PATTERNS.some((pattern) => pattern.test(command));
-  const safe = SAFE_BASH_PATTERNS.some((pattern) => pattern.test(command));
-  return !destructive && safe;
+function safeCommand(command: string): boolean {
+  return !DESTRUCTIVE.some((pattern) => pattern.test(command)) && SAFE_BASH.some((pattern) => pattern.test(command));
 }
 
-function getAssistantText(messages: Array<{ role?: string; content?: unknown }>): string | null {
-  for (let i = messages.length - 1; i >= 0; i -= 1) {
-    const message = messages[i];
-    if (message?.role !== "assistant") continue;
-
-    if (typeof message.content === "string") {
-      return message.content;
-    }
-
-    if (Array.isArray(message.content)) {
-      const text = message.content
-        .filter((part): part is { type: string; text: string } => {
-          return Boolean(part && typeof part === "object" && "type" in part && "text" in part);
-        })
-        .filter((part) => part.type === "text")
-        .map((part) => part.text)
-        .join("\n")
-        .trim();
-
-      return text.length > 0 ? text : null;
-    }
-  }
-
-  return null;
+function assistantText(messages: Array<{ role?: string; content?: unknown }>): string | null {
+  const message = [...messages].reverse().find((item) => item.role === "assistant");
+  if (!message) return null;
+  if (typeof message.content === "string") return message.content;
+  if (!Array.isArray(message.content)) return null;
+  const text = message.content
+    .filter((part): part is { type: string; text: string } => Boolean(part && typeof part === "object" && "type" in part && "text" in part))
+    .filter((part) => part.type === "text")
+    .map((part) => part.text)
+    .join("\n").trim();
+  return text || null;
 }
 
-function extractPlan(text: string): { rawPlan: string; steps: PlanStep[] } | null {
-  const header = text.match(/\*{0,2}Plan:\*{0,2}\s*\n/i);
+function extractPlan(text: string): { raw: string; steps: PlanStep[] } | null {
+  const header = text.match(/\*{0,2}Plan:?\*{0,2}\s*\n/i);
   if (!header) return null;
-
-  const planText = text.slice(text.indexOf(header[0]) + header[0].length);
-  const numberedPattern = /^\s*(\d+)[.)]\s+(.+)$/gm;
   const steps: PlanStep[] = [];
-
-  for (const match of planText.matchAll(numberedPattern)) {
+  for (const match of text.slice((header.index ?? 0) + header[0].length).matchAll(/^\s*(\d+)[.)]\s+(.+)$/gm)) {
     const step = Number(match[1]);
-    const line = match[2]?.trim();
-    if (!Number.isFinite(step) || !line) continue;
-    steps.push({ step, text: line, completed: false });
+    if (Number.isFinite(step) && match[2]?.trim()) steps.push({ step, text: match[2].trim() });
   }
-
-  if (steps.length === 0) return null;
-
-  const rawPlan = steps.map((s) => `${s.step}. ${s.text}`).join("\n");
-  return { rawPlan, steps };
-}
-
-function isGoAheadText(text: string): boolean {
-  const t = text.trim().toLowerCase();
-  return ["go ahead", "go-ahead", "next", "next step", "continue", "proceed", "yes"].includes(t);
-}
-
-function isRunAllText(text: string): boolean {
-  const t = text.trim().toLowerCase();
-  return ["run all", "execute all", "do all", "run full plan", "execute full plan"].includes(t);
-}
-
-function isRevisePlanText(text: string): boolean {
-  const t = text.trim().toLowerCase();
-  return t === "revise plan" || t.startsWith("revise plan:");
+  return steps.length ? { raw: steps.map((step) => `${step.step}. ${step.text}`).join("\n"), steps } : null;
 }
 
 export default function planModeExtension(pi: ExtensionAPI): void {
-  let planModeEnabled = false;
-  let pendingPlan: string | null = null;
+  let enabled = false;
+  let execution = false;
+  let plan: string | null = null;
   let steps: PlanStep[] = [];
   let normalTools: string[] = [];
-  let phase: PlanPhase = "planning";
-  let currentStepIndex = 0;
 
-  const persist = () => {
-    pi.appendEntry("plan-mode-state", {
-      enabled: planModeEnabled,
-      pendingPlan,
-      steps,
-      normalTools,
-      phase,
-      currentStepIndex,
-    } satisfies PlanState);
+  const persist = () => pi.appendEntry("plan-mode-state", { enabled, execution, plan, steps, normalTools } satisfies PlanState);
+  const status = (ctx: ExtensionContext) => {
+    ctx.ui.setStatus("plan-mode", enabled
+      ? ctx.ui.theme.fg("warning", "⏸ plan")
+      : execution ? ctx.ui.theme.fg("accent", "⚙ executing plan") : undefined);
+    ctx.ui.setWidget("plan-preview", plan && enabled ? plan.split("\n").map((line) => ctx.ui.theme.fg("muted", line)) : undefined);
   };
-
-  const updateStatus = (ctx: ExtensionContext) => {
-    if (planModeEnabled && phase === "planning") {
-      ctx.ui.setStatus("plan-mode", ctx.ui.theme.fg("warning", "⏸ plan mode"));
-    } else if (planModeEnabled && phase === "clarifying") {
-      ctx.ui.setStatus("plan-mode", ctx.ui.theme.fg("warning", "❓ awaiting clarifications"));
-    } else if (planModeEnabled && phase === "executing") {
-      ctx.ui.setStatus("plan-mode", ctx.ui.theme.fg("accent", "⚙️ executing one approved step"));
-    } else if (pendingPlan) {
-      ctx.ui.setStatus("plan-mode", ctx.ui.theme.fg("accent", "📋 awaiting go-ahead"));
-    } else {
-      ctx.ui.setStatus("plan-mode", undefined);
-    }
-
-    if (pendingPlan && steps.length > 0 && (phase === "ready" || phase === "executing")) {
-      const lines = [ctx.ui.theme.fg("accent", "Plan (step-by-step):")];
-      for (let i = 0; i < steps.length; i += 1) {
-        const step = steps[i];
-        const marker = i < currentStepIndex ? "✅" : i === currentStepIndex ? "👉" : "⬜";
-        lines.push(`${marker} ${ctx.ui.theme.fg("muted", `${step.step}.`)} ${step.text}`);
-      }
-      ctx.ui.setWidget("plan-preview", lines);
-    } else {
-      ctx.ui.setWidget("plan-preview", undefined);
-    }
+  const tools = (names: string[]) => {
+    const available = new Set(pi.getAllTools().map((tool) => tool.name));
+    return names.filter((name, index) => available.has(name) && names.indexOf(name) === index);
   };
-
-  const setPlanMode = (ctx: ExtensionContext, enabled: boolean) => {
-    planModeEnabled = enabled;
-
-    if (enabled) {
-      if (normalTools.length === 0) {
-        normalTools = pi.getActiveTools();
-      }
-
-      if (!pendingPlan) {
-        phase = "planning";
-      }
-
-      const available = new Set(pi.getAllTools().map((tool) => tool.name));
-      const readonlyTools = PLAN_TOOLS.filter((name) => available.has(name));
-      if (phase === "executing") {
-        pi.setActiveTools(normalTools);
-      } else {
-        pi.setActiveTools(readonlyTools);
-      }
-      ctx.ui.notify("Plan mode enabled: agent will analyze, show steps, ask clarifications, then wait for your go-ahead per step.", "info");
+  const setEnabled = (ctx: ExtensionContext, value: boolean) => {
+    enabled = value;
+    if (value) {
+      if (!normalTools.length) normalTools = pi.getActiveTools();
+      pi.setActiveTools(tools(READ_ONLY_TOOLS));
+      ctx.ui.notify("Plan mode enabled. Read-only exploration; no files will be changed.", "info");
     } else {
-      if (normalTools.length > 0) {
-        pi.setActiveTools(normalTools);
-      }
-      ctx.ui.notify("Plan mode disabled.", "info");
+      pi.setActiveTools(normalTools.length ? normalTools : pi.getActiveTools());
+      ctx.ui.notify("Plan mode disabled. Full tool access restored.", "info");
     }
-
-    updateStatus(ctx);
+    status(ctx);
     persist();
   };
+  const toggle = (ctx: ExtensionContext) => setEnabled(ctx, !enabled);
 
-  pi.registerFlag("plan", {
-    description: "Start in plan mode (preview plan + clarifying questions before execution)",
-    type: "boolean",
-    default: false,
-  });
+  pi.registerFlag("plan", { description: "Start in read-only plan mode", type: "boolean", default: false });
+  pi.registerCommand("plan", { description: "Toggle read-only plan mode", handler: async (_args, ctx) => toggle(ctx) });
+  pi.registerCommand("plan-off", { description: "Disable plan mode", handler: async (_args, ctx) => setEnabled(ctx, false) });
 
-  pi.registerCommand("plan", {
-    description: "Enable orchestrated plan mode (optionally pass the task)",
-    handler: async (args, ctx) => {
-      if (!planModeEnabled) {
-        setPlanMode(ctx, true);
+  pi.registerShortcut("shift+tab", {
+    description: "Cycle normal, plan, and learn modes",
+    handler: async (ctx) => {
+      const learnState = ctx.sessionManager.getEntries()
+        .filter((item) => item.type === "custom" && item.customType === "learn-mode-state")
+        .pop() as { data?: { enabled?: boolean } } | undefined;
+      if (learnState?.data?.enabled) {
+        pi.sendUserMessage("/learn-off");
+      } else if (enabled) {
+        setEnabled(ctx, false);
+        pi.sendUserMessage("/learn");
       } else {
-        updateStatus(ctx);
-      }
-
-      if (args.trim()) {
-        pi.sendUserMessage(args.trim());
-      } else {
-        ctx.ui.notify("Plan mode is active. Send your task, and I will plan -> clarify -> wait for go-ahead per step.", "info");
+        setEnabled(ctx, true);
       }
     },
-  });
-
-  pi.registerCommand("plan-off", {
-    description: "Disable plan mode",
-    handler: async (_args, ctx) => setPlanMode(ctx, false),
-  });
-
-  pi.registerCommand("plan-show", {
-    description: "Show current pending plan",
-    handler: async (_args, ctx) => {
-      if (!pendingPlan) {
-        ctx.ui.notify("No pending plan yet. Enable /plan and ask the agent to produce one.", "info");
-        return;
-      }
-
-      if (phase !== "ready") {
-        ctx.ui.notify("Plan preview is hidden until clarifying questions are fully answered.", "info");
-        return;
-      }
-
-      pi.sendMessage({
-        customType: "plan-preview",
-        display: true,
-        content: `Plan preview:\n\n${pendingPlan}\n\nReply "go ahead" to execute the next step only (or say "run all").`,
-      });
-      updateStatus(ctx);
-    },
-  });
-
-  pi.registerCommand("execute-plan", {
-    description: "Execute the currently approved plan",
-    handler: async (_args, ctx) => {
-      if (!pendingPlan) {
-        ctx.ui.notify("No pending plan to execute.", "warning");
-        return;
-      }
-
-      if (phase === "clarifying") {
-        ctx.ui.notify("Wait for the clarifying-question round to finish first.", "warning");
-        return;
-      }
-
-      setPlanMode(ctx, false);
-
-      const approvedPlan = pendingPlan;
-      pendingPlan = null;
-      steps = [];
-      currentStepIndex = 0;
-      phase = "planning";
-      updateStatus(ctx);
-      persist();
-
-      pi.sendUserMessage(`Execute this approved plan:\n\n${approvedPlan}`);
-    },
-  });
-
-  const startNextStep = (ctx: ExtensionContext) => {
-    if (!planModeEnabled || !pendingPlan || steps.length === 0) {
-      ctx.ui.notify("No step-by-step plan is ready.", "warning");
-      return;
-    }
-
-    if (phase === "clarifying" || phase === "planning") {
-      ctx.ui.notify("Finish plan + clarifications first.", "warning");
-      return;
-    }
-
-    if (currentStepIndex >= steps.length) {
-      ctx.ui.notify("All plan steps are already complete.", "info");
-      return;
-    }
-
-    phase = "executing";
-    pi.setActiveTools(normalTools);
-    updateStatus(ctx);
-    persist();
-
-    const step = steps[currentStepIndex];
-    pi.sendUserMessage(
-      `Go ahead. Execute ONLY step ${step.step}: ${step.text}\n\nAfter completing this single step, stop and summarize what changed and any follow-up questions.`,
-    );
-  };
-
-  pi.registerCommand("go-ahead", {
-    description: "Execute the next plan step only",
-    handler: async (_args, ctx) => {
-      startNextStep(ctx);
-    },
-  });
-
-  pi.registerShortcut(Key.ctrlAlt("p"), {
-    description: "Toggle plan mode",
-    handler: async (ctx) => setPlanMode(ctx, !planModeEnabled),
-  });
-
-  pi.on("input", async (event, ctx) => {
-    if (!planModeEnabled || event.source === "extension") {
-      return { action: "continue" };
-    }
-
-    const text = event.text ?? "";
-
-    if (phase === "ready" && isGoAheadText(text)) {
-      startNextStep(ctx);
-      return { action: "handled" };
-    }
-
-    if (phase === "ready" && isRunAllText(text)) {
-      setPlanMode(ctx, false);
-
-      const approvedPlan = pendingPlan;
-      pendingPlan = null;
-      steps = [];
-      currentStepIndex = 0;
-      phase = "planning";
-      updateStatus(ctx);
-      persist();
-
-      if (approvedPlan) {
-        pi.sendUserMessage(`Execute this approved plan:\n\n${approvedPlan}`);
-      }
-      return { action: "handled" };
-    }
-
-    if ((phase === "ready" || phase === "clarifying") && isRevisePlanText(text)) {
-      phase = "planning";
-      currentStepIndex = 0;
-      pendingPlan = null;
-      steps = [];
-      const available = new Set(pi.getAllTools().map((tool) => tool.name));
-      const readonlyTools = PLAN_TOOLS.filter((name) => available.has(name));
-      pi.setActiveTools(readonlyTools);
-      persist();
-      updateStatus(ctx);
-      return { action: "transform", text: "Revise the plan based on this feedback and output only a numbered plan under a Plan: header. " + text };
-    }
-
-    return { action: "continue" };
   });
 
   pi.on("tool_call", async (event) => {
-    if (!planModeEnabled || phase === "executing" || event.toolName !== "bash") return;
-
+    if (!enabled || execution || event.toolName !== "bash") return;
     const command = (event.input as { command?: string }).command ?? "";
-    if (!isSafeCommand(command)) {
-      return {
-        block: true,
-        reason: `Plan mode only allows read-only bash commands. Blocked: ${command}`,
-      };
-    }
+    if (!safeCommand(command)) return { block: true, reason: `Plan mode only allows read-only bash commands. Disable plan mode first.\nCommand: ${command}` };
   });
 
   pi.on("before_agent_start", async () => {
-    if (!planModeEnabled) return;
-
-    if (phase === "planning") {
-      return {
-        message: {
-          customType: "plan-mode-context",
-          display: false,
-          content: `[PLAN MODE ACTIVE]
-You are in read-only planning mode.
-
-Rules:
-- Explore and analyze only.
-- Do not make edits.
-- Produce a numbered plan under a "Plan:" header.
-- Do not execute the plan yet.
-
-Format exactly like:
-Plan:
-1. ...
-2. ...
-3. ...`,
-        },
-      };
-    }
-
-    if (phase === "clarifying") {
-      return {
-        message: {
-          customType: "plan-clarify-context",
-          display: false,
-          content: `[CLARIFYING QUESTIONS PHASE]
-You already produced a draft plan.
-Ask clarifying questions ONE AT A TIME.
-
-Rules:
-- Ask exactly one concise clarifying question in this response.
-- Wait for the user's answer before asking the next question.
-- Do not show or restate the plan yet.
-- Do not execute anything.
-- If there are no more questions, respond exactly: "No clarifying questions."`,
-        },
-      };
-    }
-
-    return {
-      message: {
-        customType: "plan-ready-context",
-        display: false,
-        content: `[PLAN READY - WAITING FOR APPROVAL]
-Stay in planning mode only.
-If user gives clarification answers, update the plan and present it again under "Plan:".
-Do not execute until the user explicitly says "go ahead" (or equivalent).`,
-      },
-    };
+    if (enabled) return { message: { customType: "plan-mode-context", display: false, content: `[PLAN MODE ACTIVE]\nYou are in read-only planning mode. Explore the codebase and understand the request, but do not edit files or run mutating commands. End with a concise numbered plan under exactly a "Plan:" header. Do not execute the plan.` } };
+    if (execution && plan) return { message: { customType: "plan-execution-context", display: false, content: `[EXECUTING APPROVED PLAN]\nImplement the approved plan below. Work through it in order, make the necessary changes, and verify the result.\n\n${plan}` } };
   });
 
   pi.on("agent_end", async (event, ctx) => {
-    if (!planModeEnabled) return;
-
-    const text = getAssistantText(event.messages ?? []);
-    if (!text) return;
-
-    if (phase === "planning") {
-      const extracted = extractPlan(text);
-      if (!extracted) return;
-
-      pendingPlan = extracted.rawPlan;
-      steps = extracted.steps;
-      currentStepIndex = 0;
-      phase = "clarifying";
+    if (execution) {
+      execution = false;
+      plan = null;
+      steps = [];
       persist();
-      updateStatus(ctx);
-
-      pi.sendMessage({
-        customType: "plan-preview",
-        display: true,
-        content: "Draft plan captured. Plan preview is hidden until clarifying questions are answered.",
-      });
-
-      pi.sendUserMessage(
-        "Before any execution, ask me your first clarifying question. Ask one question at a time. If none, say 'No clarifying questions.'",
-      );
+      status(ctx);
       return;
     }
-
-    if (phase === "clarifying") {
-      const noMoreQuestions = /^\s*no clarifying questions\.?\s*$/im.test(text);
-      if (!noMoreQuestions) {
-        persist();
-        updateStatus(ctx);
-        return;
-      }
-
-      phase = "ready";
+    if (!enabled) return;
+    const text = assistantText(event.messages ?? []);
+    const extracted = text && extractPlan(text);
+    if (!extracted) return;
+    plan = extracted.raw;
+    steps = extracted.steps;
+    persist();
+    status(ctx);
+    const choice = await ctx.ui.select("Plan ready — what next?", ["Execute plan", "Refine plan", "Stay in plan mode"]);
+    if (choice === "Execute plan") {
+      execution = true;
+      setEnabled(ctx, false);
+      status(ctx);
       persist();
-      updateStatus(ctx);
-
-      pi.sendMessage({
-        customType: "plan-clarification-ready",
-        display: true,
-        content:
-          "Clarifications complete. Here is the plan preview:\n\n" +
-          pendingPlan +
-          "\n\nReply \"go ahead\" to execute only the next step (or \"run all\").",
-      });
-      return;
-    }
-
-    if (phase === "executing") {
-      if (currentStepIndex < steps.length) {
-        steps[currentStepIndex] = { ...steps[currentStepIndex], completed: true };
-        currentStepIndex += 1;
-      }
-
-      if (currentStepIndex >= steps.length) {
-        phase = "planning";
-        pendingPlan = null;
-        steps = [];
-        currentStepIndex = 0;
-        const available = new Set(pi.getAllTools().map((tool) => tool.name));
-        const readonlyTools = PLAN_TOOLS.filter((name) => available.has(name));
-        pi.setActiveTools(readonlyTools);
-        pi.sendMessage({
-          customType: "plan-complete",
-          display: true,
-          content: "All plan steps are complete.",
-        });
-      } else {
-        phase = "ready";
-        const available = new Set(pi.getAllTools().map((tool) => tool.name));
-        const readonlyTools = PLAN_TOOLS.filter((name) => available.has(name));
-        pi.setActiveTools(readonlyTools);
-        pi.sendMessage({
-          customType: "plan-next-step",
-          display: true,
-          content: `Step complete. Reply "go ahead" for next step (${steps[currentStepIndex].step}), or say "run all".`,
-        });
-      }
-
-      persist();
-      updateStatus(ctx);
-      return;
-    }
-
-    const extracted = extractPlan(text);
-    if (extracted) {
-      pendingPlan = extracted.rawPlan;
-      steps = extracted.steps;
-      currentStepIndex = 0;
-      persist();
-      updateStatus(ctx);
+      pi.sendUserMessage(`Execute this approved plan:\n\n${plan}`);
+    } else if (choice === "Refine plan") {
+      const feedback = await ctx.ui.editor("How should the plan change?", "");
+      if (feedback?.trim()) pi.sendUserMessage(`Revise the plan using this feedback. Stay read-only and output only the updated numbered plan under a Plan: header.\n\n${feedback.trim()}`);
     }
   });
 
   pi.on("session_start", async (_event, ctx) => {
-    const entries = ctx.sessionManager.getEntries();
-    const stateEntry = entries
-      .filter((entry) => entry.type === "custom" && entry.customType === "plan-mode-state")
-      .pop() as { data?: PlanState } | undefined;
-
+    const entry = ctx.sessionManager.getEntries().filter((item) => item.type === "custom" && item.customType === "plan-mode-state").pop() as { data?: PlanState } | undefined;
     normalTools = pi.getActiveTools();
-
-    if (stateEntry?.data) {
-      planModeEnabled = Boolean(stateEntry.data.enabled);
-      pendingPlan = stateEntry.data.pendingPlan ?? null;
-      steps = stateEntry.data.steps ?? [];
-      normalTools = stateEntry.data.normalTools?.length ? stateEntry.data.normalTools : normalTools;
-      phase = stateEntry.data.phase ?? (pendingPlan ? "ready" : "planning");
-      currentStepIndex = stateEntry.data.currentStepIndex ?? 0;
-    }
-
-    if (pi.getFlag("plan") === true) {
-      planModeEnabled = true;
-      if (!pendingPlan) phase = "planning";
-    }
-
-    if (planModeEnabled) {
-      setPlanMode(ctx, true);
-    } else {
-      updateStatus(ctx);
-    }
+    if (entry?.data) ({ enabled, execution, plan, steps, normalTools } = entry.data);
+    if (pi.getFlag("plan") === true) enabled = true;
+    if (enabled) pi.setActiveTools(tools(READ_ONLY_TOOLS));
+    status(ctx);
   });
 }

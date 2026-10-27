@@ -1,0 +1,111 @@
+import {
+  CustomEditor,
+  type ExtensionAPI,
+  type ExtensionContext,
+  type KeybindingsManager,
+} from "@earendil-works/pi-coding-agent";
+import type { EditorTheme, TUI } from "@earendil-works/pi-tui";
+import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
+
+function shortenPath(path: string): string {
+  const home = process.env.HOME;
+  return home && path.startsWith(home) ? `~${path.slice(home.length)}` : path;
+}
+
+function borderLine(
+  left: string,
+  right: string,
+  width: number,
+  color: (text: string) => string,
+): string {
+  if (width <= 0) return "";
+  const available = Math.max(0, width - 2);
+  let l = left;
+  let r = right;
+  while (visibleWidth(l) + visibleWidth(r) + 3 > available && visibleWidth(r) > 0) {
+    r = truncateToWidth(r, visibleWidth(r) - 1, "");
+  }
+  while (visibleWidth(l) + visibleWidth(r) + 3 > available && visibleWidth(l) > 0) {
+    l = truncateToWidth(l, visibleWidth(l) - 1, "");
+  }
+  const fill = "─".repeat(Math.max(0, available - visibleWidth(l) - visibleWidth(r) - 1));
+  return `${color("╭")}${color(l)}${color(fill)}${color(r)}${color("╮")}`;
+}
+
+function contextLabel(ctx: ExtensionContext): string {
+  const usage = ctx.getContextUsage();
+  if (!usage || usage.percent === null) return "ctx ?";
+  return `ctx ${Math.round(usage.percent)}%`;
+}
+
+export default function (pi: ExtensionAPI) {
+  let visible = true;
+  let activeTui: TUI | undefined;
+  let branch = "";
+
+  const updateWidget = (ctx: ExtensionContext) => {
+    if (!visible) {
+      ctx.ui.setWidget("opencode-layout", undefined);
+      return;
+    }
+    const project = shortenPath(ctx.cwd);
+    const model = ctx.model ? `${ctx.model.provider}/${ctx.model.id}` : "no model";
+    ctx.ui.setWidget("opencode-layout", [
+      `  ${project}`,
+      `  ${model} · ${pi.getThinkingLevel()} · ${contextLabel(ctx)}${branch ? ` · ${branch}` : ""}`,
+    ], { placement: "aboveEditor" });
+  };
+
+  pi.registerCommand("layout", {
+    description: "Toggle the OpenCode-style project header",
+    handler: async (_args, ctx) => {
+      visible = !visible;
+      updateWidget(ctx);
+    },
+  });
+
+  pi.registerShortcut("ctrl+shift+b", {
+    description: "Toggle the OpenCode-style project header",
+    handler: async (ctx) => {
+      visible = !visible;
+      updateWidget(ctx);
+    },
+  });
+
+  pi.on("session_start", async (_event, ctx) => {
+    const result = await pi.exec("git", ["branch", "--show-current"], { cwd: ctx.cwd }).catch(() => undefined);
+    branch = result?.stdout.trim() || "";
+    updateWidget(ctx);
+
+    ctx.ui.setEditorComponent((tui, theme, keybindings) => {
+      activeTui = tui;
+      return new OpenCodeEditor(tui, theme, keybindings, ctx);
+    });
+  });
+
+  pi.on("agent_start", () => activeTui?.requestRender());
+  pi.on("agent_end", () => activeTui?.requestRender());
+  pi.on("session_shutdown", () => { activeTui = undefined; });
+}
+
+class OpenCodeEditor extends CustomEditor {
+  constructor(
+    tui: TUI,
+    theme: EditorTheme,
+    keybindings: KeybindingsManager,
+    private readonly ctx: ExtensionContext,
+  ) {
+    super(tui, theme, keybindings, { paddingX: 1 });
+  }
+
+  render(width: number): string[] {
+    const lines = super.render(width);
+    if (lines.length < 2) return lines;
+    const color = (text: string) => this.borderColor(text);
+    const model = this.ctx.model ? this.ctx.model.id : "no model";
+    const right = ` ${model} · ${this.ctx.getContextUsage()?.percent ?? "?"}% `;
+    lines[0] = borderLine("", right, width, color);
+    lines[lines.length - 1] = borderLine(" > ", "", width, color);
+    return lines;
+  }
+}

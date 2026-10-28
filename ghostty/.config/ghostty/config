@@ -7,7 +7,7 @@
 # font-family = "Code New Roman"
 font-family = "Iosevka SS02"
 font-size = 15.5
-adjust-cell-height = 50%
+adjust-cell-height = 15%
 
 # Font variations
 # font-style = italic
@@ -55,7 +55,7 @@ auto-update = check
 custom-shader = ./shaders/space.glsl
 
 # Themes
-# theme = gotham-default
+theme = ayu-dark
 # theme = github-dark
 # theme = rose-pine
 # theme = monokai-pro-octagon
@@ -64,7 +64,7 @@ custom-shader = ./shaders/space.glsl
 # theme = 3024 night
 # theme = Arthur
 # theme = jubi
-theme = Everforest Dark Hard
+# theme = noctis-default
 
 # #Github Theme
 # background = #010409
@@ -116,7 +116,7 @@ theme = Everforest Dark Hard
 
 # Transparency settings
 # background-opacity = 1
-background-opacity = .85
+background-opacity = .80
 background-blur-radius = 65
 
 # Cursor settings

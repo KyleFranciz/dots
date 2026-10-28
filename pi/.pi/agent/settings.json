@@ -7,6 +7,7 @@
   "packages": [
     "git:github.com/DietrichGebert/ponytail",
     "npm:@gotgenes/pi-anthropic-auth",
-    "git:github.com/amosblomqvist/pi-interactive-subagents"
+    "git:github.com/amosblomqvist/pi-interactive-subagents",
+    "npm:pi-cc-extensions"
   ]
 }
